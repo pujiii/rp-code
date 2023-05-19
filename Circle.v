@@ -38,5 +38,5 @@ Proof.
 Qed.
 
 Definition ev (A : Type) : 
-  (S1 → A) → exists (a : A), a = a :=
-  
+  (S1 → A) → ∑ (a : A), a = a :=
+  fun g => tpair (fun a => a = a) (g base) (paths_refl (g base)).
