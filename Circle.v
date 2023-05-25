@@ -60,3 +60,10 @@ Definition ve (A : Type) :
   (∑ (a : A), a = a) → (S1 → A) :=
   fun p => S1_recur A (pr1 p) (paths_refl (pr1 p)).
 
+
+(* TO DO *)
+(* Theorem ev_equiv: Equivalence ev.
+Proof.
+  
+Qed. *)
+
