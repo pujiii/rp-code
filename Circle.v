@@ -24,10 +24,10 @@ Definition S1_ind (P : S1 -> Type) (b : P base) (l : transportf P loop b = b)
 Axiom S1_ind_loop : forall (P : S1 -> Type) (b : P base) (l : transportf P loop b = b),
     apD (S1_ind P b l) loop = l.
 
-Definition S1_recur (A : Type) (b : A) (l : b = b) : S1 -> A :=
+Definition S1_recur (A : Type) (a : A) (l : a = a) : S1 -> A :=
   fun x =>
     match x with
-    | base => transportf (fun _ => A) l b
+    | base => transportf (fun _ => A) l a
     end.
 End S1.
 
@@ -51,21 +51,26 @@ Proof.
   - apply propproperty.
 Qed.
 
-(* Try to prove: forall (z: S1), z = base *)
-(* Lemma circle_connected' : forall (z: S1), z = base.
-Proof.
-  intro z.
-  use (S1_ind (fun z => z = base) _ _ z).
-  - exact (idpath base). 
-  - give_up. *)
-
 Definition ev (A : Type) : 
   (S1 → A) → ∑ (a : A), a = a :=
   fun g => tpair (fun a => a = a) (g base) (paths_refl (g base)).
 
 Definition ve (A : Type) :
   (∑ (a : A), a = a) → (S1 → A) :=
-  fun p => S1_recur A (pr1 p) (paths_refl (pr1 p)).
+  fun p => S1_recur A (pr1 p) (pr2 p).
+
+
+Lemma evisweq (A : UU) : isweq (ev A).
+Proof.
+  use isweq_iso.
+  - exact (ve A).
+  - intro f.
+    unfold ve.
+    unfold ev.
+    simpl.
+    apply funext.
+    
+
 
 (* TO DO *)
 (* Theorem ev_equiv: Equivalence ev.
