@@ -76,7 +76,7 @@ Proof.
     unfold ve.
     unfold ev.
     simpl.
-    apply funextfun.
+    apply funextfun. (* provided by Copilot *)
     use S1_ind.
     + reflexivity.
     + Check transportf_paths_FlFr.
@@ -93,3 +93,119 @@ Proof.
     reflexivity.
 Qed.
 
+Search isaset.
+
+Check hfiber.
+
+Definition SetBundle (B : UU) : UU := ∑ (A : UU) (f : A -> B), ∏ (b : B), isaset (hfiber f b).
+
+Definition is_groupoid (A : UU) := ∏ (x: A) (y : A), isaset (x = y).
+
+Lemma map_rl {A : UU} : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)) -> (A -> hSet).
+Proof.
+  intro Bf.
+  intro a.
+  exact (make_hSet _ ((pr2 (pr2 Bf)) a)).
+Defined.
+
+Lemma map_lr {A : UU} : (A -> hSet) -> (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)).
+Proof.
+  intro f.
+  use tpair.
+  - exact (∑ (a : A), f a).
+  - simpl.
+    use tpair.
+    + exact pr1.
+    + simpl.
+      intro a.
+      use (isofhlevelweqf 2).
+      * exact (∑ (a : A), f a).
+      * use weq_iso.
+        -- intro x.
+           use make_hfiber. 
+           ++ exact x.
+           ++ 
+      Search (isofhlevel _ ≃ isaset _).
+      
+Admitted.
+
+Lemma map_inv_eq_lrrl {A : Type} (Bf : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a))) : (map_lr (map_rl Bf)) = Bf.
+Proof.
+  
+Admitted.
+
+Lemma map_inv_eq_rllr {A : UU} (f : A -> hSet) : (map_rl (map_lr f)) = f.
+Proof.
+Admitted.
+
+Lemma set_families (A : UU) : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)) ≃ (A -> hSet).
+Proof.
+  exists map_rl. 
+  apply (isweq_iso map_rl map_lr).
+  - exact map_inv_eq_lrrl.
+  - exact map_inv_eq_rllr.
+Qed.
+
+Lemma setbundle_isgroupoid (B : UU) : is_groupoid (SetBundle B).
+Proof.
+unfold is_groupoid.
+unfold SetBundle.
+intros x y.
+Admitted.
+
+Theorem ev_set_equiv (B : UU) : isweq (ev (hSet)).
+Proof.
+use evisweq.
+Qed.
+
+Theorem setbundle_s1_set : SetBundle S1 ≃ (S1 -> hSet).
+Proof.
+simpl.  
+unfold SetBundle.
+simpl.
+use (set_families S1).
+  use weq_iso.
+  - intro p.
+    unfold SetBundle in p.
+    intro x.
+    Check ((pr1 (pr2 p))).
+    admit.
+  - intro f.
+    exact (ve (hSet) f).
+  - intro f.
+    unfold ve.
+    unfold ev.
+    simpl.
+    use funextfun.
+    use S1_ind.
+    + reflexivity.
+    + simpl.
+      rewrite transportf_paths_FlFr.
+      rewrite S1_recur_loop.
+      simpl.
+      use pathsinv0l.
+  - intro p.
+    unfold ve.
+    unfold ev.
+    simpl.
+    rewrite S1_recur_loop.
+    reflexivity. 
+(* 
+Admitted. *)
+(* Search (_ ≃ (_ -> hSet)) .
+Theorem circ_groupoid_func_equiv : is_groupoid S1.
+Proof.
+  unfold is_groupoid.
+  intros x y.
+  use isweqhomot.
+  - exact (fun p => p @ loop).
+  - intro p.
+    induction p.
+    simpl.
+    use pathsinv0l.
+  - intro p.
+    induction p.
+    simpl.
+    use pathsinv0l. *)
+(* 
+Definition f (P : S1 -> UU) (R : S1 -> UU) : ∏ (z : S1), (P z -> R z) := fun z => fun p => transportf R p. *)
