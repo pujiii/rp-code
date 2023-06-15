@@ -93,10 +93,6 @@ Proof.
     reflexivity.
 Qed.
 
-Search isaset.
-
-Check hfiber.
-
 Definition SetBundle (B : UU) : UU := ∑ (A : UU) (f : A -> B), ∏ (b : B), isaset (hfiber f b).
 
 Definition is_groupoid (A : UU) := ∏ (x: A) (y : A), isaset (x = y).
@@ -119,23 +115,38 @@ Proof.
     + simpl.
       intro a.
       use (isofhlevelweqf 2).
-      * exact (∑ (a : A), f a).
+      * exact (f a).
       * use weq_iso.
         -- intro x.
            use make_hfiber. 
-           ++ exact x.
-           ++ 
-      Search (isofhlevel _ ≃ isaset _).
-      
-Admitted.
+           ++ use tpair.
+              ** exact a.
+              ** exact x.
+           ++ reflexivity.
+        -- intro x.
+           refine (transportf f _ (pr21 x)).
+           exact (pr2 x).
+        -- simpl.
+           intro x.
+           reflexivity.
+        -- intro x.
+           induction x as [y z].
+           induction z.
+           reflexivity.
+      * set (test := f a).
+        apply (pr2 test). (* Given by copilot. *)
+Defined.
 
 Lemma map_inv_eq_lrrl {A : Type} (Bf : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a))) : (map_lr (map_rl Bf)) = Bf.
 Proof.
-  
+unfold map_lr.
+unfold map_rl.  
 Admitted.
 
 Lemma map_inv_eq_rllr {A : UU} (f : A -> hSet) : (map_rl (map_lr f)) = f.
 Proof.
+unfold map_rl.
+unfold map_lr.
 Admitted.
 
 Lemma set_families (A : UU) : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)) ≃ (A -> hSet).
@@ -164,48 +175,18 @@ simpl.
 unfold SetBundle.
 simpl.
 use (set_families S1).
-  use weq_iso.
-  - intro p.
-    unfold SetBundle in p.
-    intro x.
-    Check ((pr1 (pr2 p))).
-    admit.
-  - intro f.
-    exact (ve (hSet) f).
-  - intro f.
-    unfold ve.
-    unfold ev.
-    simpl.
-    use funextfun.
-    use S1_ind.
-    + reflexivity.
-    + simpl.
-      rewrite transportf_paths_FlFr.
-      rewrite S1_recur_loop.
-      simpl.
-      use pathsinv0l.
-  - intro p.
-    unfold ve.
-    unfold ev.
-    simpl.
-    rewrite S1_recur_loop.
-    reflexivity. 
-(* 
-Admitted. *)
-(* Search (_ ≃ (_ -> hSet)) .
-Theorem circ_groupoid_func_equiv : is_groupoid S1.
+Qed.
+
+Theorem setbundle_s1_sigmaequals : SetBundle S1 ≃ ∑ (X : hSet), X = X.
 Proof.
-  unfold is_groupoid.
-  intros x y.
-  use isweqhomot.
-  - exact (fun p => p @ loop).
-  - intro p.
-    induction p.
-    simpl.
-    use pathsinv0l.
-  - intro p.
-    induction p.
-    simpl.
-    use pathsinv0l. *)
-(* 
-Definition f (P : S1 -> UU) (R : S1 -> UU) : ∏ (z : S1), (P z -> R z) := fun z => fun p => transportf R p. *)
+  use weq_iso.
+  - intro s.
+    unfold SetBundle in s.
+    use tpair.
+    + induction s as [A s'].
+      induction s' as [f g].
+      exact (hfiber f base).
+
+Theorem setbundle_s1_sigmasimeq : SetBundle S1 ≃ ∑ (X : hSet), X ≃ X.
+
+Theorem setbundle_s1_isSet_times_isEquiv : SetBundle S1 ≃ ∑ (X : UU) (f : X -> X), isaset X × isweq X.
