@@ -35,19 +35,6 @@ Axiom S1_recur_loop : forall (A : Type) (a : A) (l : a = a) ,
 
 End S1.
 
-
-Lemma circle_eq_sym : forall (x y : S1), x = y -> y = x.
-Proof.
-  intros x y eqxy.
-  rewrite eqxy.
-  reflexivity.
-Qed.
-
-Lemma base_refl : base = base.
-Proof.
-  reflexivity.
-Qed.
-
 Lemma circle_connected : forall (z: S1), ∥ z = base ∥.
 Proof.
   intro z.
@@ -59,10 +46,6 @@ Qed.
 Definition ev (A : Type) : 
   (S1 → A) → ∑ (a : A), a = a :=
   fun g => tpair (fun a => a = a) (g base) (maponpaths g loop).
-
-(* Definition ev' (A : Type) (a : A) :
-  (S1 -> A × a = a) -> (a = a) :=
-  fun t => (pr2 t) @ (maponpaths (pr1 t) loop). *)
 
 Definition ve (A : Type) :
   (∑ (a : A), a = a) → (S1 → A) :=
@@ -94,8 +77,6 @@ Proof.
 Qed.
 
 Definition SetBundle (B : UU) : UU := ∑ (A : UU) (f : A -> B), ∏ (b : B), isaset (hfiber f b).
-
-Definition is_groupoid (A : UU) := ∏ (x: A) (y : A), isaset (x = y).
 
 Lemma map_rl {A : UU} : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)) -> (A -> hSet).
 Proof.
@@ -139,15 +120,52 @@ Defined.
 
 Lemma map_inv_eq_lrrl {A : Type} (Bf : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a))) : (map_lr (map_rl Bf)) = Bf.
 Proof.
-unfold map_lr.
-unfold map_rl.  
-Admitted.
+use total2_paths_f.
+- apply weqtopaths.
+  apply sum_of_fibers.
+- induction Bf as [B fH].
+  induction fH as [f H].
+  use subtypePath.
+  + intro. 
+    apply impred_isaprop.
+    intro t.
+    apply isapropisaset.
+  + simpl. 
+    rewrite transportf_total2.
+    simpl.
+    rewrite transportf_fun.
+    rewrite <- eqweqmap_transportb.
+    simpl.
+    rewrite eqweqmap_pathsinv0.
+    rewrite eqweqmap_weqtopaths.
+    reflexivity.
+Qed.
 
 Lemma map_inv_eq_rllr {A : UU} (f : A -> hSet) : (map_rl (map_lr f)) = f.
 Proof.
-unfold map_rl.
-unfold map_lr.
-Admitted.
+apply funextfun.
+intro a.
+apply hSet_univalence.
+cbn.
+use weq_iso.
+- intro fib.
+  refine (transportf f _ (pr21 fib)).
+  exact (pr2 fib).
+- intro x.
+  use make_hfiber. 
+  ++ use tpair.
+    ** exact a.
+    ** exact x.
+  ++ reflexivity.
+- simpl.
+  intro x.
+  induction x as [y z]. 
+  induction z.
+  reflexivity.
+- simpl.
+  intro y.
+  reflexivity. 
+Qed.
 
 Lemma set_families (A : UU) : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)) ≃ (A -> hSet).
 Proof.
@@ -157,13 +175,6 @@ Proof.
   - exact map_inv_eq_rllr.
 Qed.
 
-Lemma setbundle_isgroupoid (B : UU) : is_groupoid (SetBundle B).
-Proof.
-unfold is_groupoid.
-unfold SetBundle.
-intros x y.
-Admitted.
-
 Theorem ev_set_equiv (B : UU) : isweq (ev (hSet)).
 Proof.
 use evisweq.
@@ -171,22 +182,57 @@ Qed.
 
 Theorem setbundle_s1_set : SetBundle S1 ≃ (S1 -> hSet).
 Proof.
-simpl.  
-unfold SetBundle.
-simpl.
 use (set_families S1).
 Qed.
 
-Theorem setbundle_s1_sigmaequals : SetBundle S1 ≃ ∑ (X : hSet), X = X.
+Theorem s1_set_sigmaequals : (S1 -> hSet) ≃ ∑ (X : hSet), X = X.
 Proof.
-  use weq_iso.
-  - intro s.
-    unfold SetBundle in s.
+use tpair.
+- exact (ev hSet).
+- simpl. exact (evisweq hSet).
+Qed.
+
+Theorem setbundle_sigmaeq_sigmasimeq : (∑ (X : hSet), X = X) ≃ (∑ (X : hSet), X ≃ X).
+Proof.
+  Search ((∑ _ : ?X, _) ≃ (∑ _ : ?X, _)).
+  apply weqfibtototal.
+  intro X.
+  apply hSet_univalence.
+Qed.
+
+Theorem sigmasimeq_isSet_times_isEquiv : (∑ (X : hSet), X ≃ X) ≃ (∑ (X : UU) (f : X -> X), ((isaset X) × (isweq f))).
+Proof.
+Search (∑ (_ : ∑ _ : _, _), _).
+use weq_iso.
+- intro Xp.
+  induction Xp as [X p].
+  use tpair.
+  + exact X.
+  + simpl.
     use tpair.
-    + induction s as [A s'].
-      induction s' as [f g].
-      exact (hfiber f base).
-
-Theorem setbundle_s1_sigmasimeq : SetBundle S1 ≃ ∑ (X : hSet), X ≃ X.
-
-Theorem setbundle_s1_isSet_times_isEquiv : SetBundle S1 ≃ ∑ (X : UU) (f : X -> X), isaset X × isweq X.
+    * exact p.
+    * split. (* provided by copilot *)
+      -- exact (pr2 X).
+      -- exact (pr2 p).
+- intro Xfpr.
+  induction Xfpr as [X fpr].
+  induction fpr as [f pr].
+  induction pr as [p r].
+  use tpair.
+  + exact (make_hSet X p).
+  + simpl.
+    use tpair.
+    * exact f.
+    * simpl. exact r.
+- simpl.
+  intro Xp.
+  induction Xp as [X p].
+  unfold make_hSet.
+  reflexivity.
+- simpl.
+  intro Xfpr.
+  induction Xfpr as [X fpr].
+  induction fpr as [f pr].
+  induction pr as [p r].
+  reflexivity.
+Qed.
