@@ -62,8 +62,7 @@ Proof.
     apply funextfun. (* provided by Copilot *)
     use S1_ind.
     + reflexivity.
-    + Check transportf_paths_FlFr.
-      simpl.
+    + simpl.
       rewrite transportf_paths_FlFr.
       rewrite S1_recur_loop.
       simpl.
@@ -99,72 +98,72 @@ Proof.
       * exact (f a).
       * use weq_iso.
         -- intro x.
-           use make_hfiber. 
-           ++ use tpair.
+            use make_hfiber. 
+            ++ use tpair.
               ** exact a.
               ** exact x.
-           ++ reflexivity.
+            ++ reflexivity.
         -- intro x.
-           refine (transportf f _ (pr21 x)).
-           exact (pr2 x).
+            refine (transportf f _ (pr21 x)).
+            exact (pr2 x).
         -- simpl.
-           intro x.
-           reflexivity.
+            intro x.
+            reflexivity.
         -- intro x.
-           induction x as [y z].
-           induction z.
-           reflexivity.
+            induction x as [y z].
+            induction z.
+            reflexivity.
       * set (test := f a).
         apply (pr2 test). (* Given by copilot. *)
 Defined.
 
 Lemma map_inv_eq_lrrl {A : Type} (Bf : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a))) : (map_lr (map_rl Bf)) = Bf.
 Proof.
-use total2_paths_f.
-- apply weqtopaths.
-  apply sum_of_fibers.
-- induction Bf as [B fH].
-  induction fH as [f H].
-  use subtypePath.
-  + intro. 
-    apply impred_isaprop.
-    intro t.
-    apply isapropisaset.
-  + simpl. 
-    rewrite transportf_total2.
-    simpl.
-    rewrite transportf_fun.
-    rewrite <- eqweqmap_transportb.
-    simpl.
-    rewrite eqweqmap_pathsinv0.
-    rewrite eqweqmap_weqtopaths.
-    reflexivity.
+  use total2_paths_f.
+  - apply weqtopaths.
+    apply sum_of_fibers.
+  - induction Bf as [B fH].
+    induction fH as [f H].
+    use subtypePath.
+    + intro. 
+      apply impred_isaprop.
+      intro t.
+      apply isapropisaset.
+    + simpl. 
+      rewrite transportf_total2.
+      simpl.
+      rewrite transportf_fun.
+      rewrite <- eqweqmap_transportb.
+      simpl.
+      rewrite eqweqmap_pathsinv0.
+      rewrite eqweqmap_weqtopaths.
+      reflexivity.
 Qed.
 
 Lemma map_inv_eq_rllr {A : UU} (f : A -> hSet) : (map_rl (map_lr f)) = f.
 Proof.
-apply funextfun.
-intro a.
-apply hSet_univalence.
-cbn.
-use weq_iso.
-- intro fib.
-  refine (transportf f _ (pr21 fib)).
-  exact (pr2 fib).
-- intro x.
-  use make_hfiber. 
-  ++ use tpair.
-    ** exact a.
-    ** exact x.
-  ++ reflexivity.
-- simpl.
-  intro x.
-  induction x as [y z]. 
-  induction z.
-  reflexivity.
-- simpl.
-  intro y.
-  reflexivity. 
+  apply funextfun.
+  intro a.
+  apply hSet_univalence.
+  cbn.
+  use weq_iso.
+  - intro fib.
+    refine (transportf f _ (pr21 fib)).
+    exact (pr2 fib).
+  - intro x.
+    use make_hfiber. 
+    ++ use tpair.
+      ** exact a.
+      ** exact x.
+    ++ reflexivity.
+  - simpl.
+    intro x.
+    induction x as [y z]. 
+    induction z.
+    reflexivity.
+  - simpl.
+    intro y.
+    reflexivity. 
 Qed.
 
 Lemma set_families (A : UU) : (∑ (B : UU) (f : B -> A) , ∏ (a : A), isaset (hfiber f a)) ≃ (A -> hSet).
@@ -177,24 +176,23 @@ Qed.
 
 Theorem ev_set_equiv (B : UU) : isweq (ev (hSet)).
 Proof.
-use evisweq.
+  use evisweq.
 Qed.
 
 Theorem setbundle_s1_set : SetBundle S1 ≃ (S1 -> hSet).
 Proof.
-use (set_families S1).
+  use (set_families S1).
 Qed.
 
 Theorem s1_set_sigmaequals : (S1 -> hSet) ≃ ∑ (X : hSet), X = X.
 Proof.
-use tpair.
-- exact (ev hSet).
-- simpl. exact (evisweq hSet).
+  use tpair.
+  - exact (ev hSet).
+  - simpl. exact (evisweq hSet).
 Qed.
 
 Theorem setbundle_sigmaeq_sigmasimeq : (∑ (X : hSet), X = X) ≃ (∑ (X : hSet), X ≃ X).
 Proof.
-  Search ((∑ _ : ?X, _) ≃ (∑ _ : ?X, _)).
   apply weqfibtototal.
   intro X.
   apply hSet_univalence.
@@ -202,37 +200,27 @@ Qed.
 
 Theorem sigmasimeq_isSet_times_isEquiv : (∑ (X : hSet), X ≃ X) ≃ (∑ (X : UU) (f : X -> X), ((isaset X) × (isweq f))).
 Proof.
-Search (∑ (_ : ∑ _ : _, _), _).
-use weq_iso.
-- intro Xp.
-  induction Xp as [X p].
-  use tpair.
-  + exact X.
-  + simpl.
+  use weq_iso.
+  - intro Xp.
+    induction Xp as [X p].
     use tpair.
-    * exact p.
-    * split. (* provided by copilot *)
-      -- exact (pr2 X).
-      -- exact (pr2 p).
-- intro Xfpr.
-  induction Xfpr as [X fpr].
-  induction fpr as [f pr].
-  induction pr as [p r].
-  use tpair.
-  + exact (make_hSet X p).
-  + simpl.
+    + exact X.
+    + simpl.
+      use tpair.
+      * exact p.
+      * split. (* provided by copilot *)
+        -- exact (pr2 X).
+        -- exact (pr2 p).
+  - intro Xfpr.
+    induction Xfpr as [X fpr].
+    induction fpr as [f pr].
+    induction pr as [p r].
     use tpair.
-    * exact f.
-    * simpl. exact r.
-- simpl.
-  intro Xp.
-  induction Xp as [X p].
-  unfold make_hSet.
-  reflexivity.
-- simpl.
-  intro Xfpr.
-  induction Xfpr as [X fpr].
-  induction fpr as [f pr].
-  induction pr as [p r].
-  reflexivity.
+    + exact (make_hSet X p).
+    + simpl.
+      use tpair.
+      * exact f.
+      * simpl. exact r.
+  - reflexivity.
+  - reflexivity.
 Qed.
