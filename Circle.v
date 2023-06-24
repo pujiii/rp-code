@@ -224,3 +224,17 @@ Proof.
   - reflexivity.
   - reflexivity.
 Qed.
+
+Theorem string_of_equivalences : SetBundle S1 ≃ (∑ (X : UU) (f : X -> X), ((isaset X) × (isweq f))).
+Proof.
+  use weqcomp.
+  - exact (S1 -> hSet).
+  - exact setbundle_s1_set.
+  - use weqcomp.
+    + exact (∑ (X : hSet), X = X).
+    + exact s1_set_sigmaequals.
+    + use weqcomp.
+      * exact ((∑ (X : hSet), X ≃ X)).
+      * exact setbundle_sigmaeq_sigmasimeq.
+      * exact sigmasimeq_isSet_times_isEquiv.
+Qed.
